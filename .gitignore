@@ -1,0 +1,17 @@
+# 依赖
+node_modules/
+.pnpm-store/
+
+# 环境变量与密钥（绝对不能提交）
+.env
+.env.local
+.env.*.local
+
+# Vercel
+.vercel/
+
+# 系统与日志
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*

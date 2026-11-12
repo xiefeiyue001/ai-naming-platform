@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AI 起名平台 · 名字有出处</title>
+<style>
+  :root {
+    --paper: #f7f4ed;
+    --card: #fffdf8;
+    --ink: #23201c;
+    --ink-2: #5d574f;
+    --ink-3: #8d857a;
+    --line: #e4dccf;
+    --accent: #a8442b;
+    --accent-2: #c9743c;
+    --green: #3f6b52;
+    --shadow: 0 1px 2px rgba(35,32,28,.04), 0 12px 32px rgba(35,32,28,.06);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background:
+      radial-gradient(1200px 500px at 15% -10%, #fff8ec 0%, transparent 60%),
+      radial-gradient(900px 400px at 100% 0%, #f2eee4 0%, transparent 55%),
+      var(--paper);
+    color: var(--ink);
+    font-family: "Songti SC", "Noto Serif SC", "Source Han Serif SC", Georgia, serif;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 34px 20px 70px; }
+
+  header.top { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .seal {
+    width: 46px; height: 46px; border-radius: 8px;
+    background: var(--accent); color: #fff;
+    display: grid; place-items: center;
+    font-size: 17px; letter-spacing: 1px;
+    box-shadow: var(--shadow);
+  }
+  h1 { margin: 0; font-size: 27px; letter-spacing: 2px; font-weight: 600; }
+  .sub { margin: 4px 0 0; color: var(--ink-3); font-size: 13.5px; letter-spacing: .6px; }
+  .top-meta { color: var(--ink-3); font-size: 12.5px; text-align: right; line-height: 1.7; }
+
+  main { display: grid; grid-template-columns: 400px 1fr; gap: 22px; margin-top: 28px; align-items: start; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 14px; box-shadow: var(--shadow); padding: 20px;
+  }
+  .card h2 { margin: 0 0 14px; font-size: 15px; letter-spacing: 1.5px; color: var(--ink-2); font-weight: 600; }
+
+  label.field { display: block; font-size: 12.5px; color: var(--ink-3); letter-spacing: .8px; margin: 0 0 8px; }
+  textarea {
+    width: 100%; min-height: 128px; resize: vertical; padding: 13px 14px;
+    border: 1px solid var(--line); border-radius: 10px; background: #fff;
+    font-family: inherit; font-size: 15px; line-height: 1.7; color: var(--ink);
+    outline: none; transition: border-color .15s, box-shadow .15s;
+  }
+  textarea:focus { border-color: var(--accent-2); box-shadow: 0 0 0 3px rgba(201,116,60,.12); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 2px; }
+  .chip {
+    border: 1px solid var(--line); background: #fff; color: var(--ink-2);
+    padding: 6px 11px; border-radius: 999px; font-size: 12.5px; cursor: pointer;
+    font-family: inherit; transition: all .15s;
+  }
+  .chip:hover { border-color: var(--accent-2); color: var(--accent); background: #fff9f2; }
+
+  .row { display: flex; gap: 12px; margin-top: 16px; }
+  select {
+    flex: 1; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px;
+    background: #fff; font-family: inherit; font-size: 14px; color: var(--ink); outline: none; cursor: pointer;
+  }
+  select:focus { border-color: var(--accent-2); }
+
+  .btn-primary {
+    width: 100%; margin-top: 16px; padding: 13px 16px; border: 0; border-radius: 10px;
+    background: linear-gradient(180deg, #b44d31, #963d26); color: #fff;
+    font-family: inherit; font-size: 15.5px; letter-spacing: 3px; cursor: pointer;
+    box-shadow: 0 6px 18px rgba(150,61,38,.22); transition: transform .12s, opacity .15s;
+  }
+  .btn-primary:hover { transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+  .btn-stop {
+    width: 100%; margin-top: 10px; padding: 10px; border: 1px dashed var(--line); border-radius: 10px;
+    background: transparent; color: var(--ink-3); font-family: inherit; font-size: 13px; cursor: pointer;
+    display: none;
+  }
+  .btn-stop:hover { color: var(--accent); border-color: var(--accent-2); }
+
+  .hint { margin-top: 14px; font-size: 12px; color: var(--ink-3); line-height: 1.8; }
+
+  /* 输出区 */
+  .out-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+  .out-head h2 { margin: 0; }
+  .status { font-size: 12.5px; color: var(--ink-3); display: flex; align-items: center; gap: 7px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--line); }
+  .dot.live { background: var(--green); animation: pulse 1.2s infinite; }
+  .dot.err { background: var(--accent); }
+  @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .35 } }
+
+  .output {
+    min-height: 330px; max-height: 560px; overflow-y: auto;
+    padding: 4px 4px 8px; line-height: 1.95; font-size: 16.5px; color: var(--ink);
+    white-space: pre-wrap; word-break: break-word;
+  }
+  .output .placeholder { color: var(--ink-3); font-size: 14px; line-height: 2; }
+  .output h3 {
+    font-size: 19px; margin: 20px 0 6px; color: var(--accent); letter-spacing: 1.5px; font-weight: 600;
+    border-left: 3px solid var(--accent); padding-left: 10px;
+  }
+  .output h3:first-child { margin-top: 4px; }
+  .output .kv { color: var(--ink-2); }
+  .output .k { color: var(--ink-3); }
+  .output .err-box { color: var(--accent); font-size: 14.5px; background: #fdf1ec; border: 1px solid #f0d5c9; padding: 12px 14px; border-radius: 10px; }
+  .cursor::after {
+    content: ""; display: inline-block; width: 8px; height: 17px; margin-left: 2px;
+    background: var(--accent); opacity: .55; vertical-align: -2px;
+    animation: blink 1s steps(1) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0 } }
+
+  .out-foot { display: flex; align-items: center; justify-content: space-between; border-top: 1px dashed var(--line); margin-top: 12px; padding-top: 12px; }
+  .save-note { font-size: 12px; color: var(--ink-3); }
+  .btn-ghost {
+    border: 1px solid var(--line); background: #fff; color: var(--ink-2); border-radius: 8px;
+    padding: 7px 12px; font-family: inherit; font-size: 12.5px; cursor: pointer;
+  }
+  .btn-ghost:hover { border-color: var(--accent-2); color: var(--accent); }
+
+  /* 历史 */
+  .history-card { margin-top: 22px; }
+  .history-list { display: flex; flex-direction: column; gap: 10px; }
+  .h-item {
+    border: 1px solid var(--line); border-radius: 10px; padding: 11px 13px; background: #fff;
+    cursor: pointer; transition: all .15s;
+  }
+  .h-item:hover { border-color: var(--accent-2); background: #fffaf4; }
+  .h-item .h-top { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; color: var(--ink-3); }
+  .h-item .h-req { font-size: 13.5px; color: var(--ink-2); margin-top: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .empty { color: var(--ink-3); font-size: 13px; }
+
+  footer.page { margin-top: 30px; text-align: center; color: var(--ink-3); font-size: 12px; letter-spacing: .5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="seal">名</div>
+      <div>
+        <h1>AI 起名平台</h1>
+        <p class="sub">多模型驱动 · 流式生成 · 名字有出处，寓意讲得清</p>
+      </div>
+    </div>
+    <div class="top-meta">
+      支持 DeepSeek / 豆包 / 通义千问 / Kimi<br />
+      起名记录自动存档
+    </div>
+  </header>
+
+  <main>
+    <!-- 左：输入 -->
+    <section class="card">
+      <h2>起名需求</h2>
+      <label class="field" for="req">写清姓氏、性别、字数、风格或想表达的寓意</label>
+      <textarea id="req" placeholder="例如：姓林，男孩，国风，两个字，希望寓意沉稳有书卷气"></textarea>
+
+      <div class="chips" id="chips">
+        <button class="chip" data-fill="姓林，男孩，国风，两个字，希望寓意沉稳有书卷气">男孩 · 国风 · 两字</button>
+        <button class="chip" data-fill="姓苏，女孩，温柔诗意，三个字，出自诗经或楚辞">女孩 · 诗经楚辞</button>
+        <button class="chip" data-fill="英文名，男孩，现代简约，好读好记，含义阳光">英文名 · 现代</button>
+        <button class="chip" data-fill="姓陈，中性，现代简约，两个字，含义是自由与旷达">中性 · 简约</button>
+      </div>
+
+      <div class="row">
+        <select id="model" aria-label="选择模型">
+          <option value="deepseek">DeepSeek</option>
+          <option value="doubao">豆包（火山方舟）</option>
+          <option value="qwen">通义千问</option>
+          <option value="kimi">Kimi</option>
+        </select>
+      </div>
+
+      <button class="btn-primary" id="go">开始起名</button>
+      <button class="btn-stop" id="stop">停止生成</button>
+
+      <p class="hint">
+        生成 3 组名字，每组附带寓意与适合人群。<br />
+        密钥只存在服务端环境变量中，浏览器看不到。
+      </p>
+    </section>
+
+    <!-- 右：输出 -->
+    <section class="card">
+      <div class="out-head">
+        <h2>起名方案</h2>
+        <div class="status"><span class="dot" id="dot"></span><span id="status">等待输入</span></div>
+      </div>
+      <div class="output" id="output">
+        <div class="placeholder">填写左侧需求，点击「开始起名」。<br />名字会边生成边出现，不用等全部写完。</div>
+      </div>
+      <div class="out-foot">
+        <span class="save-note" id="saveNote">历史记录状态：待生成</span>
+        <button class="btn-ghost" id="copy">复制方案</button>
+      </div>
+    </section>
+  </main>
+
+  <section class="card history-card">
+    <div class="out-head">
+      <h2>起名历史</h2>
+      <button class="btn-ghost" id="reload">刷新</button>
+    </div>
+    <div class="history-list" id="history"><div class="empty">还没有记录</div></div>
+  </section>
+
+  <footer class="page">· 起名仅供参考，正式取名建议结合字义、方言读音与家族辈分再确认 ·</footer>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const outputEl = $('output');
+const statusEl = $('status');
+const dotEl = $('dot');
+const goBtn = $('go');
+const stopBtn = $('stop');
+const saveNote = $('saveNote');
+let controller = null;
+let lastText = '';
+
+const MODEL_LABEL = { deepseek: 'DeepSeek', doubao: '豆包', qwen: '通义千问', kimi: 'Kimi' };
+
+$('chips').addEventListener('click', (e) => {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  $('req').value = chip.dataset.fill;
+  $('req').focus();
+});
+
+function setStatus(text, kind) {
+  statusEl.textContent = text;
+  dotEl.className = 'dot' + (kind ? ' ' + kind : '');
+}
+
+// 极简渲染：转义 HTML 后，把 ### 标题、- 寓意 处理成可读版式
+function render(text, streaming) {
+  const esc = text
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  let html = esc
+    .replace(/###\s*([^\n]+)/g, '\n<h3>$1</h3>\n')
+    .replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/^-\s*寓意[:：]/gm, '<span class="k">- 寓意：</span>')
+    .replace(/^-\s*适合[:：]/gm, '<span class="k">- 适合：</span>');
+  outputEl.innerHTML = html;
+  if (streaming) outputEl.classList.add('cursor');
+  else outputEl.classList.remove('cursor');
+  outputEl.scrollTop = outputEl.scrollHeight;
+}
+
+async function generate() {
+  const requirement = $('req').value.trim();
+  if (!requirement) {
+    $('req').focus();
+    setStatus('请先写需求', 'err');
+    return;
+  }
+  const model = $('model').value;
+
+  controller = new AbortController();
+  goBtn.disabled = true;
+  stopBtn.style.display = 'block';
+  outputEl.innerHTML = '';
+  saveNote.textContent = '正在生成…';
+  setStatus(MODEL_LABEL[model] + ' 正在思考', 'live');
+  lastText = '';
+
+  try {
+    const resp = await fetch('/api/name', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ requirement, model }),
+      signal: controller.signal,
+    });
+
+    if (!resp.ok) {
+      let msg = '请求失败（' + resp.status + '）';
+      try { const j = await resp.json(); msg = j.error || msg; } catch {}
+      throw new Error(msg);
+    }
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let buffer = '';
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const events = buffer.split('\n\n');
+      buffer = events.pop() || '';
+      for (const evt of events) {
+        const line = evt.trim();
+        if (!line.startsWith('data:')) continue;
+        let payload;
+        try { payload = JSON.parse(line.slice(5).trim()); } catch { continue; }
+
+        if (payload.type === 'meta') {
+          setStatus(payload.label + ' 生成中', 'live');
+        } else if (payload.type === 'delta') {
+          lastText += payload.text;
+          render(lastText, true);
+        } else if (payload.type === 'done') {
+          render(lastText, false);
+          setStatus('生成完成', '');
+          saveNote.textContent = payload.saveError
+            ? '未存档：' + payload.saveError
+            : (payload.id ? '已存入历史记录（#' + payload.id + '）' : '生成成功');
+          loadHistory();
+        } else if (payload.type === 'error') {
+          throw new Error(payload.message);
+        }
+      }
+    }
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      setStatus('已停止', '');
+      saveNote.textContent = '已手动停止，本次内容不完整、未存档';
+      render(lastText, false);
+    } else {
+      outputEl.innerHTML = '<div class="err-box">' + String(err.message || err).replace(/</g, '&lt;') + '</div>';
+      setStatus('出错了', 'err');
+      saveNote.textContent = '请检查该模型的密钥或接口地址';
+    }
+  } finally {
+    goBtn.disabled = false;
+    stopBtn.style.display = 'none';
+    controller = null;
+  }
+}
+
+async function loadHistory() {
+  const box = $('history');
+  try {
+    const r = await fetch('/api/history?limit=20');
+    const j = await r.json();
+    if (!j.items || !j.items.length) {
+      box.innerHTML = '<div class="empty">' + (j.configured === false ? '未配置 Supabase，历史功能未启用' : '还没有记录') + '</div>';
+      return;
+    }
+    box.innerHTML = j.items.map((it) => {
+      const t = new Date(it.created_at).toLocaleString('zh-CN', { hour12: false });
+      const req = (it.user_requirement || '').replace(/</g, '&lt;');
+      return '<div class="h-item" data-id="' + it.id + '">' +
+        '<div class="h-top"><span>' + (MODEL_LABEL[it.model_name] || it.model_name) + '</span><span>' + t + '</span></div>' +
+        '<div class="h-req">' + req + '</div></div>';
+    }).join('');
+    box.querySelectorAll('.h-item').forEach((el) => {
+      el.addEventListener('click', () => {
+        const it = j.items.find((x) => String(x.id) === el.dataset.id);
+        if (it) { lastText = it.name_result; render(lastText, false); setStatus('历史记录 #' + it.id, ''); }
+      });
+    });
+  } catch {
+    box.innerHTML = '<div class="empty">历史记录读取失败</div>';
+  }
+}
+
+goBtn.addEventListener('click', generate);
+stopBtn.addEventListener('click', () => { if (controller) controller.abort(); });
+$('reload').addEventListener('click', loadHistory);
+$('copy').addEventListener('click', async () => {
+  if (!lastText) return;
+  try { await navigator.clipboard.writeText(lastText); saveNote.textContent = '已复制到剪贴板'; }
+  catch { saveNote.textContent = '复制失败，请手动选择文本'; }
+});
+$('req').addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') generate();
+});
+
+loadHistory();
+</script>
+</body>
+</html>

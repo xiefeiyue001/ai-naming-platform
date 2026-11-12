@@ -1,0 +1,18 @@
+{
+  "name": "ai-naming-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI 起名平台：多模型切换 + 流式输出 + Supabase 起名历史",
+  "scripts": {
+    "dev": "node scripts/dev-server.js",
+    "start": "node scripts/dev-server.js",
+    "vercel-dev": "vercel dev"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4",
+    "dotenv": "^16.4.5"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
