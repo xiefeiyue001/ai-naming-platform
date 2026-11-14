@@ -6,7 +6,7 @@
 
 - 生产环境：https://ai-naming-platform-alpha.vercel.app
 - GitHub 仓库：https://github.com/xiefeiyue001/ai-naming-platform
-- Supabase 项目：ai-naming-platform（东京区域）
+- Supabase 项目：task-manager（新加坡区域 ap-southeast-1，表 `public.name_history`）
 
 > 说明：`*.vercel.app` 在中国大陆网络下常被解析到黑洞地址（如 159.106.121.75），直连会超时。如需在国内直接打开，需要代理，或给项目绑定一个自己的域名。项目本身从境外节点访问一切正常（已用 Supabase 数据库的 pg_net 扩展实测首页与接口均返回 200）。
 
